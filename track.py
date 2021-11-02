@@ -90,6 +90,12 @@ def detect(opt):
     txt_file_name = source.split('/')[-1].split('.')[0]
     txt_path = str(Path(out)) + '/' + txt_file_name + '.txt'
 
+
+    # initialize line ####################################################
+    line = [(0, 200), (1000, 200)]
+    ######################################################################
+
+
     for frame_idx, (path, img, im0s, vid_cap) in enumerate(dataset):
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
@@ -118,6 +124,12 @@ def detect(opt):
 
             annotator = Annotator(im0, line_width=2, pil=not ascii)
 
+
+            # draw line ############################################################
+            cv2.line(im0,line[0],line[1],(0,0,255),2)
+            ########################################################################
+
+            
             if det is not None and len(det):
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_coords(
