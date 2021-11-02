@@ -99,8 +99,11 @@ def detect(opt):
     txt_path = str(Path(out)) + '/' + txt_file_name + '.txt'
 
 
-    # initialize line, memory ############################################
+    # initialize line, counter, memory ############################################
     line = [(0, 200), (1000, 200)]
+    people_counter_in = 0
+    people_counter_out = 0
+    total_counter = 0
     memory = {}
     previous1 = {}
     ######################################################################
@@ -221,6 +224,13 @@ def detect(opt):
 
             else:
                 deepsort.increment_ages()
+
+            # print in, out, total ###################################################
+            total_counter = people_counter_in - people_counter_out
+            cv2.putText(im0, 'In : {}'.format(people_counter_in),(40,50),cv2.FONT_HERSHEY_COMPLEX,1.0,(0,0,255),2)
+            cv2.putText(im0, 'Out : {}'.format(people_counter_out), (40,80),cv2.FONT_HERSHEY_COMPLEX,1.0,(0,0,255),2)
+            cv2.putText(im0, 'Total : {}'.format(total_counter), (40,110),cv2.FONT_HERSHEY_COMPLEX,1.0,(0,0,255),2)
+            ##########################################################################
 
             # Print time (inference + NMS)
             print('%sDone. (%.3fs)' % (s, t2 - t1))
