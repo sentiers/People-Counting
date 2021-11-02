@@ -106,6 +106,8 @@ def detect(opt):
     total_counter = 0
     memory = {}
     previous1 = {}
+    previous2 = {}
+    previous3 = {}
     ######################################################################
 
 
@@ -164,6 +166,8 @@ def detect(opt):
                 index_id = []
                 names_ls = []
                 boxes = []
+                previous3 = previous2
+                previous2 = previous1
                 previous1 = memory.copy()
                 memory = {}
                 ########################################################################
@@ -208,6 +212,22 @@ def detect(opt):
                             # track line
                             cv2.line(im0,p0,p1,(255,0,255),1)
 
+                            # previous2
+                            if index_id[i] in previous2:
+                                previous_box2 = previous2[index_id[i]]
+                                (x2, y2) = (int(previous_box2[0]), int(previous_box2[1]))
+                                (w2, h2) = (int(previous_box2[2]), int(previous_box2[3]))
+                                p2 = (int(x2 + (w2-x2)/2), int(y2 + (h2-y2)/2))
+                                cv2.line(im0,p1,p2,(255,0,0),1)
+
+                                # previous3
+                                if index_id[i] in previous3:
+                                    previous_box3 = previous3[index_id[i]]
+                                    (x3, y3) = (int(previous_box3[0]), int(previous_box3[1]))
+                                    (w3, h3) = (int(previous_box3[2]), int(previous_box3[3]))
+                                    p3 = (int(x3 + (w3-x3)/2), int(y3 + (h3-y3)/2))
+                                    cv2.line(im0,p2,p3,(0,255,0),1)
+
                             # count if p0-p1 and line are intersect
                             if intersect(p0, p1, line[0], line[1]):
                                 # if p0's y coordinate is higher than p1's y coordinate
@@ -215,7 +235,6 @@ def detect(opt):
                                     people_counter_in += 1
                                 else:
                                     people_counter_out +=1
-
                         i += 1
                     #################################################################
 
