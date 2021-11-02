@@ -91,8 +91,10 @@ def detect(opt):
     txt_path = str(Path(out)) + '/' + txt_file_name + '.txt'
 
 
-    # initialize line ####################################################
+    # initialize line, memory ############################################
     line = [(0, 200), (1000, 200)]
+    memory = {}
+    previous1 = {}
     ######################################################################
 
 
@@ -129,7 +131,7 @@ def detect(opt):
             cv2.line(im0,line[0],line[1],(0,0,255),2)
             ########################################################################
 
-            
+
             if det is not None and len(det):
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_coords(
@@ -147,6 +149,14 @@ def detect(opt):
                 # pass detections to deepsort
                 outputs = deepsort.update(xywhs.cpu(), confs.cpu(), clss.cpu(), im0)
                 
+                # initialize ###########################################################
+                index_id = []
+                names_ls = []
+                boxes = []
+                previous1 = memory.copy()
+                memory = {}
+                ########################################################################
+
                 # draw boxes for visualization
                 if len(outputs) > 0:
                     for j, (output, conf) in enumerate(zip(outputs, confs)): 
@@ -158,6 +168,17 @@ def detect(opt):
                         c = int(cls)  # integer class
                         label = f'{id} {names[c]} {conf:.2f}'
                         annotator.box_label(bboxes, label, color=colors(c, True))
+
+                    # memorize ###############################################
+                    dic = {0:'person', 1:'head'}
+                    names_ls.append(dic[0])
+                    names_ls.append(dic[1])
+                    
+                    for output in outputs:
+                        boxes.append([output[0],output[1],output[2],output[3]])
+                        index_id.append('{}-{}'.format(names_ls[-1],output[-2]))
+                        memory[index_id[-1]] = boxes[-1]                        
+                    #################################################################
 
                         if save_txt:
                             # to MOT format
