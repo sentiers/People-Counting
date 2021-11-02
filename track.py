@@ -194,6 +194,9 @@ def detect(opt):
                             # get the middle coordinate of the box
                             p0 = (int(x + (w-x)/2), int(y + (h-y)/2))
                             p1 = (int(x1 + (w1-x1)/2), int(y1 + (h1-y1)/2))
+                            # track line
+                            cv2.line(im0,p0,p1,(255,0,255),1)
+
                         i += 1
                     #################################################################
 
