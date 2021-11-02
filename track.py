@@ -180,7 +180,7 @@ def detect(opt):
                         label = f'{id} {names[c]} {conf:.2f}'
                         annotator.box_label(bboxes, label, color=colors(c, True))
 
-                    # memorize ###############################################
+                    # count in, out ###############################################
                     dic = {0:'person', 1:'head'}
                     names_ls.append(dic[0])
                     names_ls.append(dic[1])
@@ -207,6 +207,14 @@ def detect(opt):
                             p1 = (int(x1 + (w1-x1)/2), int(y1 + (h1-y1)/2))
                             # track line
                             cv2.line(im0,p0,p1,(255,0,255),1)
+
+                            # count if p0-p1 and line are intersect
+                            if intersect(p0, p1, line[0], line[1]):
+                                # if p0's y coordinate is higher than p1's y coordinate
+                                if p0[1] > p1[1]:
+                                    people_counter_in += 1
+                                else:
+                                    people_counter_out +=1
 
                         i += 1
                     #################################################################
