@@ -100,7 +100,8 @@ def detect(opt):
 
 
     # initialize line, counter, memory ############################################
-    line = [(0, 200), (1000, 200)]
+    lineblue = [(0, 100), (1000, 100)]
+    linered = [(0, 200), (1000, 200)]
     people_counter_in = 0
     people_counter_out = 0
     total_counter = 0
@@ -108,6 +109,8 @@ def detect(opt):
     previous1 = {}
     previous2 = {}
     previous3 = {}
+    expectedin = []
+    expectedout = []
     ######################################################################
 
 
@@ -141,7 +144,10 @@ def detect(opt):
 
 
             # draw line ############################################################
-            cv2.line(im0,line[0],line[1],(0,0,255),2)
+            cv2.line(im0,lineblue[0],lineblue[1],(255,0,0),2)
+            cv2.line(im0,linered[0],linered[1],(0,0,255),2)
+            print(expectedin)
+            print(expectedout)
             ########################################################################
 
 
@@ -164,7 +170,6 @@ def detect(opt):
                 
                 # initialize ###########################################################
                 index_id = []
-                names_ls = []
                 boxes = []
                 previous3 = previous2
                 previous2 = previous1
@@ -184,21 +189,20 @@ def detect(opt):
                         label = f'{id} {names[c]} {conf:.2f}'
                         annotator.box_label(bboxes, label, color=colors(c, True))
 
-                    # count in, out ###############################################
-                    dic = {0:'person', 1:'head'}
-                    names_ls.append(dic[0])
-                    names_ls.append(dic[1])
-                    
+                    # count in, out ###############################################                    
                     for output in outputs:
                         boxes.append([output[0],output[1],output[2],output[3]])
-                        index_id.append('{}-{}'.format(names_ls[-1],output[-2]))
-                        memory[index_id[-1]] = boxes[-1]                        
+                        index_id.append(output[-2])
+                        memory[index_id[-1]] = boxes[-1]                      
 
                     i = int(0)
+
                     for box in boxes:
                         # extract the bounding box coordinates
                         (x, y) = (int(box[0]), int(box[1]))
                         (w, h) = (int(box[2]), int(box[3]))
+                        # get the middle coordinate of the box
+                        p0 = (int(x + (w-x)/2), int(y + (h-y)/2))
 
                         # previous1
                         if index_id[i] in previous1:
@@ -206,8 +210,6 @@ def detect(opt):
                             # extract the previous bounding box coordinates
                             (x1, y1) = (int(previous_box1[0]), int(previous_box1[1]))
                             (w1, h1) = (int(previous_box1[2]), int(previous_box1[3]))
-                            # get the middle coordinate of the box
-                            p0 = (int(x + (w-x)/2), int(y + (h-y)/2))
                             p1 = (int(x1 + (w1-x1)/2), int(y1 + (h1-y1)/2))
                             # track line
                             cv2.line(im0,p0,p1,(255,0,255),1)
@@ -228,13 +230,27 @@ def detect(opt):
                                     p3 = (int(x3 + (w3-x3)/2), int(y3 + (h3-y3)/2))
                                     cv2.line(im0,p2,p3,(0,255,0),1)
 
-                            # count if p0-p1 and line are intersect
-                            if intersect(p0, p1, line[0], line[1]):
+                            # count if p0-p1 and blue line are intersect
+                            if intersect(p0, p1, lineblue[0], lineblue[1]):
                                 # if p0's y coordinate is higher than p1's y coordinate
                                 if p0[1] > p1[1]:
-                                    people_counter_in += 1
+                                    expectedin.append((index_id[i], p0))
                                 else:
-                                    people_counter_out +=1
+                                    resultidx = [index for (index, tuple) in enumerate(expectedout) if tuple[0] == index_id[i]]
+                                    if resultidx:
+                                        expectedout.pop(resultidx[0])
+                                        people_counter_out += 1 
+
+                            # count if p0-p1 and red line are intersect                            
+                            if intersect(p0, p1, linered[0], linered[1]):
+                                # if p0's y coordinate is higher than p1's y coordinate
+                                if p0[1] > p1[1]: 
+                                    resultidx = [index for (index, tuple) in enumerate(expectedin) if tuple[0] == index_id[i]]
+                                    if resultidx:
+                                        expectedin.pop(resultidx[0])
+                                        people_counter_in += 1
+                                else:
+                                    expectedout.append((index_id[i], p0))
                         i += 1
                     #################################################################
 
