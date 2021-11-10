@@ -26,6 +26,7 @@ from pathlib import Path
 import cv2
 import torch
 import torch.backends.cudnn as cudnn
+import math
 
 ##############################################################################
 # Return true if line segments AB and CD intersect
@@ -101,16 +102,22 @@ def detect(opt):
 
     # initialize line, counter, memory ############################################
     lineblue = [(0, 100), (1000, 100)]
-    linered = [(0, 200), (1000, 200)]
-    people_counter_in = 0
-    people_counter_out = 0
-    total_counter = 0
+    linered = [(0, 250), (1000, 250)]
     memory = {}
     previous1 = {}
     previous2 = {}
     previous3 = {}
     expectedin = []
     expectedout = []
+    min_count_in = 0
+    max_count_in = 0
+    all_count_in = 0
+    total_count_in = 0
+    min_count_out = 0
+    max_count_out = 0
+    all_count_out = 0
+    total_count_out = 0
+    certainty = 0
     ######################################################################
 
 
@@ -234,22 +241,27 @@ def detect(opt):
                             if intersect(p0, p1, lineblue[0], lineblue[1]):
                                 # if p0's y coordinate is higher than p1's y coordinate
                                 if p0[1] > p1[1]:
+                                    all_count_in += 1
                                     expectedin.append((index_id[i], p0))
+                                
                                 else:
+                                    all_count_out += 1
                                     resultidx = [index for (index, tuple) in enumerate(expectedout) if tuple[0] == index_id[i]]
                                     if resultidx:
                                         expectedout.pop(resultidx[0])
-                                        people_counter_out += 1 
+                                        min_count_out += 1 
 
                             # count if p0-p1 and red line are intersect                            
                             if intersect(p0, p1, linered[0], linered[1]):
                                 # if p0's y coordinate is higher than p1's y coordinate
-                                if p0[1] > p1[1]: 
+                                if p0[1] > p1[1]:
+                                    all_count_in += 1 
                                     resultidx = [index for (index, tuple) in enumerate(expectedin) if tuple[0] == index_id[i]]
                                     if resultidx:
                                         expectedin.pop(resultidx[0])
-                                        people_counter_in += 1
+                                        min_count_in += 1
                                 else:
+                                    all_count_out += 1
                                     expectedout.append((index_id[i], p0))
                         i += 1
                     #################################################################
@@ -269,10 +281,17 @@ def detect(opt):
                 deepsort.increment_ages()
 
             # print in, out, total ###################################################
-            total_counter = people_counter_in - people_counter_out
-            cv2.putText(im0, 'In : {}'.format(people_counter_in),(40,50),cv2.FONT_HERSHEY_COMPLEX,1.0,(0,0,255),2)
-            cv2.putText(im0, 'Out : {}'.format(people_counter_out), (40,80),cv2.FONT_HERSHEY_COMPLEX,1.0,(0,0,255),2)
-            cv2.putText(im0, 'Total : {}'.format(total_counter), (40,110),cv2.FONT_HERSHEY_COMPLEX,1.0,(0,0,255),2)
+            max_count_in = all_count_in - min_count_in
+            max_count_out = all_count_out - min_count_out
+            total_count_in = (min_count_in + max_count_in)/2
+            total_count_out = (min_count_out + max_count_out)/2
+            if total_count_in + total_count_out != 0:
+                certainty = (min_count_in + min_count_out)/(total_count_in + total_count_out) * 100
+            cv2.putText(im0, 'In : {}'.format(total_count_in),(40,330),cv2.FONT_HERSHEY_COMPLEX,1.0,(255,255,255),2)
+            cv2.putText(im0, 'Out : {}'.format(total_count_out), (40,360),cv2.FONT_HERSHEY_COMPLEX,1.0,(255,255,255),2)
+            cv2.putText(im0, 'Round In : {}'.format(math.ceil(total_count_in)),(40,390),cv2.FONT_HERSHEY_COMPLEX,1.0,(0,0,0),2)
+            cv2.putText(im0, 'Round out : {}'.format(math.ceil(total_count_out)),(40,420),cv2.FONT_HERSHEY_COMPLEX,1.0,(0,0,0),2)
+            cv2.putText(im0, 'Certainty : {}%'.format(certainty),(40,450),cv2.FONT_HERSHEY_COMPLEX,1.0,(50,50,50),2)
             ##########################################################################
 
             # Print time (inference + NMS)
