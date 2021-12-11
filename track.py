@@ -27,8 +27,15 @@ import cv2
 import torch
 import torch.backends.cudnn as cudnn
 import math
+import pymongo
+import datetime
 
 ##############################################################################
+# connect with mongoDB
+client = pymongo.MongoClient("mongodb+srv://dbuser:dbuser@countingrecords.zcgy9.mongodb.net/records?retryWrites=true&w=majority")
+db = client.Records
+collection = db.record
+
 # Return true if line segments AB and CD intersect
 def intersect(A, B, C, D):
     return ccw(A, C, D) != ccw(B, C, D) and ccw(A, B, C) != ccw(A, B, D)
@@ -292,6 +299,13 @@ def detect(opt):
             cv2.putText(im0, 'Round In : {}'.format(math.ceil(total_count_in)),(40,390),cv2.FONT_HERSHEY_COMPLEX,1.0,(0,0,0),2)
             cv2.putText(im0, 'Round out : {}'.format(math.ceil(total_count_out)),(40,420),cv2.FONT_HERSHEY_COMPLEX,1.0,(0,0,0),2)
             cv2.putText(im0, 'Certainty : {}%'.format(certainty),(40,450),cv2.FONT_HERSHEY_COMPLEX,1.0,(50,50,50),2)
+
+            collection.insert_one({
+                "in" : total_count_in,
+                "out" : total_count_out,
+                "total": total_count_in - total_count_out,
+                "time" : datetime.datetime.now()
+            })
             ##########################################################################
 
             # Print time (inference + NMS)

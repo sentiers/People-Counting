@@ -1,0 +1,24 @@
+{
+  "name": "people-counting",
+  "version": "1.0.0",
+  "description": "people counting using yolov5 deepsort",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sentiers/People-Counting.git"
+  },
+  "author": "Hyunji Cho",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sentiers/People-Counting/issues"
+  },
+  "homepage": "https://github.com/sentiers/People-Counting#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^6.1.1"
+  }
+}
