@@ -33,8 +33,8 @@ import datetime
 ##############################################################################
 # connect with mongoDB
 client = pymongo.MongoClient("mongodb+srv://dbuser:dbuser@countingrecords.zcgy9.mongodb.net/records?retryWrites=true&w=majority")
-db = client.Records
-collection = db.record
+db = client.records
+collection = db.records
 
 # Return true if line segments AB and CD intersect
 def intersect(A, B, C, D):
