@@ -301,9 +301,9 @@ def detect(opt):
             cv2.putText(im0, 'Certainty : {}%'.format(certainty),(40,450),cv2.FONT_HERSHEY_COMPLEX,1.0,(50,50,50),2)
 
             collection.insert_one({
-                "in" : total_count_in,
-                "out" : total_count_out,
-                "total": total_count_in - total_count_out,
+                "in_count" : math.ceil(total_count_in),
+                "out_count" : math.ceil(total_count_out),
+                "total_count": math.ceil(total_count_in) - math.ceil(total_count_out),
                 "time" : datetime.datetime.now()
             })
             ##########################################################################
