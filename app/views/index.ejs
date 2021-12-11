@@ -31,22 +31,37 @@
         <div class="section-heading">
           <h4>실내 <em>혼잡도</em> 체크</h4>
           <img src="assets/images/heading-line-dec.png" alt="">
-          <h5>12월 11일 토요일</h5>
+          <% var today=new Date(); var year=today.getFullYear(); var month=today.getMonth() + 1; var
+            date=today.getDate(); var day=today.getDay(); var week=new Array('일요일', '월요일' , '화요일' , '수요일' , '목요일'
+            , '금요일' , '토요일' ); var datestring=month + "월 " + date + "일 " + week[day]; %>
+            <h5>
+              <%= datestring %>
+            </h5>
         </div>
         <div class="row">
           <div class="col-lg-6">
             <div class="box-item">
               <h4><a href="#">현재 실내 공간 이용자 수</a></h4>
-              <h3><%= total_count %>명</h3>
+              <h3>
+                <%= total_count %>명
+              </h3>
               <div class="gradient-button">
-                <a href="#"> 원 활 </a>
+                <%if(total_count>50){%>
+                  <a href="#"> 혼 잡 </a>
+                  <%}else if(total_count>25){%>
+                    <a href="#"> 양 호 </a>
+                    <%}else{%>
+                      <a href="#"> 원 활 </a>
+                      <%}%>
               </div>
             </div>
           </div>
           <div class="col-lg-6">
             <div class="box-item">
               <h4><a href="#">오늘의 방문자 수</a></h4>
-              <h5><%= in_count %>명</h5>
+              <h5>
+                <%= in_count %>명
+              </h5>
             </div>
           </div>
         </div>
